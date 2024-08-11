@@ -1,55 +1,4 @@
 "use strict";
-const canvas = document.getElementById('container');
-const ctx = canvas.getContext('2d');
-ctx.fillStyle = 'white';
-class ParticleSystem {
-    canvas;
-    lastId = 0;
-    ammount = 0;
-    particles = new Map();
-    size = { x: { min: 0, max: 0 }, y: { min: 0, max: 0 } };
-    diameter = { min: 0, max: 0 };
-    life = { min: 0, max: 0 };
-    speed = { x: { min: 0, max: 0 }, y: { min: 0, max: 0 } };
-    static getRandomNumberInInterval(invterval) {
-        const min = Math.ceil(invterval.min);
-        const max = Math.floor(invterval.max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-    createParticle() {
-        const particle = new Particle(this.lastId.toString(), this);
-        particle.position.x = ParticleSystem.getRandomNumberInInterval(this.size.x);
-        particle.position.y = ParticleSystem.getRandomNumberInInterval(this.size.y);
-        particle.diameter = ParticleSystem.getRandomNumberInInterval(this.diameter);
-        particle.life = ParticleSystem.getRandomNumberInInterval(this.life);
-        particle.speed.x = ParticleSystem.getRandomNumberInInterval(this.speed.x);
-        particle.speed.y = ParticleSystem.getRandomNumberInInterval(this.speed.y);
-        this.particles.set(this.lastId.toString(), particle);
-        this.lastId++;
-    }
-    init() {
-        const ctx = this.canvas.getContext('2d');
-        ctx.fillStyle = 'white';
-        for (let i = 0; i < this.ammount; i++)
-            this.createParticle();
-        setInterval(() => {
-            if (this.particles.size < this.ammount)
-                this.createParticle();
-        }, 100);
-        setInterval(() => {
-            ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.particles.forEach((particle) => {
-                ctx?.beginPath();
-                ctx?.arc(particle.position.x, particle.position.y, particle.diameter / 2, 0, 2 * Math.PI, false);
-                ctx?.closePath();
-                ctx?.fill();
-            });
-        }, 1000 / 60);
-    }
-    constructor(canvas) {
-        this.canvas = canvas;
-    }
-}
 class Particle {
     parent;
     id;
@@ -74,10 +23,58 @@ class Particle {
         this.init();
     }
 }
-const system = new ParticleSystem(canvas);
-system.ammount = 150;
-system.size = { x: { min: 0, max: canvas.width }, y: { min: 0, max: canvas.height } };
-system.diameter = { min: 1, max: 3 };
-system.life = { min: 5, max: 10 };
-system.speed = { x: { min: -15, max: 15 }, y: { min: -15, max: 15 } };
-system.init();
+class ParticleSystem {
+    canvas;
+    size;
+    lastId = 0;
+    ammount = 0;
+    particles = new Map();
+    diameter = { min: 0, max: 0 };
+    life = { min: 0, max: 0 };
+    speed = { x: { min: 0, max: 0 }, y: { min: 0, max: 0 } };
+    static getRandomNumberInInterval(invterval) {
+        const min = Math.ceil(invterval.min);
+        const max = Math.floor(invterval.max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    createParticle() {
+        const particle = new Particle(this.lastId.toString(), this);
+        particle.position.x = ParticleSystem.getRandomNumberInInterval({ min: 0, max: this.size.x });
+        particle.position.y = ParticleSystem.getRandomNumberInInterval({ min: 0, max: this.size.y });
+        particle.diameter = ParticleSystem.getRandomNumberInInterval(this.diameter);
+        particle.life = ParticleSystem.getRandomNumberInInterval(this.life);
+        particle.speed.x = ParticleSystem.getRandomNumberInInterval(this.speed.x);
+        particle.speed.y = ParticleSystem.getRandomNumberInInterval(this.speed.y);
+        this.particles.set(this.lastId.toString(), particle);
+        this.lastId++;
+    }
+    init() {
+        const ctx = this.canvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        for (let i = 0; i < this.ammount; i++)
+            this.createParticle();
+        setInterval(() => {
+            if (this.particles.size <= this.ammount)
+                this.createParticle();
+        }, 1000 / 60);
+        setInterval(() => {
+            ctx?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.particles.forEach((particle) => {
+                ctx?.beginPath();
+                ctx?.arc(particle.position.x, particle.position.y, particle.diameter / 2, 0, 2 * Math.PI, false);
+                ctx?.closePath();
+                ctx?.fill();
+            });
+        }, 1000 / 60);
+    }
+    constructor(canvas, size) {
+        this.canvas = canvas;
+        this.size = size;
+        canvas.width = size.x;
+        canvas.height = size.y;
+    }
+}
+(function (global) {
+    const cssParticles = { ParticleSystem: ParticleSystem, Particle: Particle };
+    global.cssParticles = cssParticles;
+})(window);

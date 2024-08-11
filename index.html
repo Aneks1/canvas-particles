@@ -9,6 +9,17 @@
 <body>
     <span id="text">Aneks Portfolio (Not Actually)</span>
     <canvas width="1600" height="900" id="container"></canvas>
-    <script src="dist/index.js" defer></script>
+    <script src="dist/index.js"></script>
+    <script defer>
+        const canvas = document.getElementById('container')
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        const system = new cssParticles.ParticleSystem(canvas, { x: 1600, y: 900 })
+        system.ammount = 100
+        system.diameter = { min: 1, max: 2 }
+        system.life = { min: 15, max: 20 }
+        system.speed = { x: { min: -2, max: 2 }, y: { min: -2, max: 2 } }
+        system.init()        
+    </script>
 </body>
 </html>
